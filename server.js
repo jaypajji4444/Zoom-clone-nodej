@@ -1,20 +1,12 @@
 const express = require("express");
-const http = require("http");
-// peer
-const {ExpressPeerServer} = require("peer");
-
-const { v4: uuidV4 } = require('uuid');
-const socketIo = require("socket.io");
-// Setting app
-const app = express();
-const server = http.createServer(app);
-// Socket Server
-const io = socketIo(server);
-
-// Peer Server
-const peerServer = ExpressPeerServer(server,{
-  debug:true
-})
+const app = express()
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+const { ExpressPeerServer } = require('peer');
+const peerServer = ExpressPeerServer(server, {
+  debug: true
+}); 
+const { v4: uuidV4 } = require('uuid')
 // Use
 app.use('/peerjs', peerServer);
 
@@ -34,14 +26,8 @@ app.get('/:room', (req, res) => {
   
 // Socket
 io.on("connection",(socket)=>{
-    // socket.on("join-room",(roomId,userId)=>{
-    //     socket.join(roomId);
-    //     socket.to(roomId).broadcast.emit('user-connected', userId)
-    //     console.log(`User:${userId} joined room ${roomId}`)
-    //     socket.on('disconnect', () => {
-    //       socket.to(roomId).broadcast.emit('user-disconnected', userId)
-    //     })
-    // })
+    
+   
     socket.on('join-room', (roomId, userId) => {
       socket.join(roomId)
       socket.to(roomId).broadcast.emit('user-connected', userId)
@@ -52,7 +38,7 @@ io.on("connection",(socket)=>{
     })
 })
 // Port
-const port = 8080;
+const port = 3030;
 server.listen(process.env.PORT || port,()=>{
     console.log("Application running successfully on port:",port)
 })

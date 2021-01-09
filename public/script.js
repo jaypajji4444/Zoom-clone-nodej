@@ -92,8 +92,9 @@ navigator.mediaDevices.getUserMedia({
   audio: true
 }).then(stream => {
     myPeer= new Peer(undefined, {
-        host: 'localhost',
-        port: '3001'
+        path:"peerjs",
+        host: '/',
+        port: '3030'
     });
 
     
