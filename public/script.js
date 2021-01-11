@@ -99,7 +99,7 @@ navigator.mediaDevices.getUserMedia({
     myPeer= new Peer(undefined, {
         path:"peerjs",
         host: '/',
-        port: '3030'
+        port: '443'
     });
 
     
