@@ -83,34 +83,39 @@
 
 const socket = io('/')
 const videoGrid = document.getElementById('video-grid')
-let myPeer = null;
-let myVideoStream;
-let currentUser;
 const myVideo = document.createElement('video')
 myVideo.muted = true
+// Glovbal Varaible
 const peers = {}
+let myPeer = null;
+let myVideoStream;
+let currentUser={id:null,username:"user"};
+
+currentUser.username=prompt("Enter your display name","user");
+
 navigator.mediaDevices.getUserMedia({
   video: true,
   audio: true
 }).then(stream => {
     // Initiliz Stream to handle mute/stop video
     myVideoStream=stream;
+    stream.user=currentUser
 
     myPeer= new Peer(undefined, {
         path:"peerjs",
         host: '/',
-        port: '443'
+        port: '3030'
     });
 
     
     myPeer.on('open', id => {
-        currentUser=id;
-        socket.emit('join-room', ROOM_ID, id);
+        currentUser.id=id;
+        socket.emit('join-room', ROOM_ID, id );
         addVideoStream(myVideo, stream);
       })
 
     myPeer.on('call', call => {
-        console.log(call)
+       
         call.answer(stream)
         const video = document.createElement('video')
         call.on('stream', userVideoStream => {
@@ -128,7 +133,7 @@ navigator.mediaDevices.getUserMedia({
     $('html').keydown(function (e) {
       if (e.which == 13 && text.val().length !== 0) {
         socket.emit('message', text.val());
-        $("ul").append(`<li class="message"><b>User:${currentUser.slice(0,8)}</b><br/>${text.val()}</li>`);
+        $("ul").append(`<li class="message"><b>${currentUser.id.slice(0,8)}:</b><br/>${text.val()}</li>`);
       scrollToBottom()
         text.val('')
         
@@ -136,7 +141,7 @@ navigator.mediaDevices.getUserMedia({
       }
     });
     socket.on("createMessage", ({userId,message}) => {
-      $("ul").append(`<li class="message"><b>User:${userId.slice(0,8)}</b><br/>${message}</li>`);
+      $("ul").append(`<li class="message"><b>${userId.slice(0,8)}:</b><br/>${message}</li>`);
       scrollToBottom()
     })
 })
@@ -165,8 +170,17 @@ function addVideoStream(video, stream) {
   video.addEventListener('loadedmetadata', () => {
     video.play()
   })
- 
-  videoGrid.appendChild(video)
+
+  let div=document.createElement("div");
+  div.setAttribute("class","video_container");
+  div.appendChild(video);
+  const name = document.createElement("div");
+  name.setAttribute("class","bottom-right");
+  name.innerHTML=`coolpa`
+  div.appendChild(name)
+  videoGrid.appendChild(div);
+  console.log(peers)
+
 }
 
 
@@ -190,7 +204,7 @@ const muteUnmute = () => {
 }
 
 const playStop = () => {
-  console.log('object')
+  
   let enabled = myVideoStream.getVideoTracks()[0].enabled;
   if (enabled) {
     myVideoStream.getVideoTracks()[0].enabled = false;
@@ -232,3 +246,4 @@ const setPlayVideo = () => {
   `
   document.querySelector('.main__video_button').innerHTML = html;
 }
+

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+  .container {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+#bottom-right {
+  position: absolute;
+  bottom: 8px;
+  right: 100px;
+}
+#para{
+    font-size: medium;
+    font-weight: bold;
+    color: chartreuse;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <video id="video"  onclick="play();">
+            <source src="https://www.radiantmediaplayer.com/media/big-buck-bunny-360p.mp4" type="video/mp4" />
+        </video>
+        <div id="bottom-right">
+            Content above your video
+        </div>
+    </div>
+</body>
+</html>

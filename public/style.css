@@ -101,3 +101,19 @@
 .unmute, .stop {
     color: #CC3B33;
 }
+
+.video_container{
+    position: relative;
+    text-align: center;
+    color: white;
+}
+
+.bottom-right{
+    position: absolute;
+    bottom: 8px;
+    right:20px;
+    margin-bottom: 5px;
+}
+.bottom-right:hover{
+    font-weight: bold;
+}
