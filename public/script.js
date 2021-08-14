@@ -89,7 +89,7 @@ myVideo.muted = true
 const peers = {}
 let myPeer = null;
 let myVideoStream;
-let currentUser={id:null,username:"user"};
+let currentUser={userId:null,username:"user"};
 
 currentUser.username=prompt("Enter your display name","user");
 
@@ -99,8 +99,7 @@ navigator.mediaDevices.getUserMedia({
 }).then(stream => {
     // Initiliz Stream to handle mute/stop video
     myVideoStream=stream;
-    stream.user=currentUser
-
+    
     myPeer= new Peer(undefined, {
         path:"peerjs",
         host: '/',
@@ -109,22 +108,26 @@ navigator.mediaDevices.getUserMedia({
 
     
     myPeer.on('open', id => {
-        currentUser.id=id;
-        socket.emit('join-room', ROOM_ID, id );
-        addVideoStream(myVideo, stream);
+      console.log("coolpa")
+        currentUser.userId=id;
+        socket.emit('join-room', ROOM_ID, id , currentUser.username );
+        addVideoStream(myVideo, stream, currentUser);
       })
 
-    myPeer.on('call', call => {
-       
+    myPeer.on('call', (call) => {
+       console.log("CALL:",call)
         call.answer(stream)
+       
         const video = document.createElement('video')
         call.on('stream', userVideoStream => {
-        addVideoStream(video, userVideoStream)
+          console.log("Stream",userVideoStream.user)
+        addVideoStream(video, userVideoStream, userVideoStream.user)
         })
     })
 
-    socket.on('user-connected', userId => {
-        connectToNewUser(userId, stream)
+    socket.on('user-connected', ({userId,username}) => {
+      console.log(userId)
+        connectToNewUser(userId, username, stream)
     });
 
     // input value
@@ -133,15 +136,15 @@ navigator.mediaDevices.getUserMedia({
     $('html').keydown(function (e) {
       if (e.which == 13 && text.val().length !== 0) {
         socket.emit('message', text.val());
-        $("ul").append(`<li class="message"><b>${currentUser.id.slice(0,8)}:</b><br/>${text.val()}</li>`);
-      scrollToBottom()
+      //   $("ul").append(`<li class="message"><b>${currentUser.username}:</b>${text.val()}</li>`);
+      // scrollToBottom()
         text.val('')
         
 
       }
     });
-    socket.on("createMessage", ({userId,message}) => {
-      $("ul").append(`<li class="message"><b>${userId.slice(0,8)}:</b><br/>${message}</li>`);
+    socket.on("createMessage", ({userId,message,username}) => {
+      $("ul").append(`<li class="message"><b>${username}:</b>${message}</li>`);
       scrollToBottom()
     })
 })
@@ -152,11 +155,14 @@ socket.on('user-disconnected', userId => {
 
 
 
-function connectToNewUser(userId, stream) {
-  const call = myPeer.call(userId, stream)
+function connectToNewUser(userId, username, stream) {
+  console.log("Connect:",userId)
+  const userObject = {userId,username}
+  
+  const call = myPeer.call(userId, stream,{user:currentUser})
   const video = document.createElement('video')
   call.on('stream', userVideoStream => {
-    addVideoStream(video, userVideoStream)
+    addVideoStream(video, userVideoStream , userObject)
   })
   call.on('close', () => {
     video.remove()
@@ -165,7 +171,7 @@ function connectToNewUser(userId, stream) {
   peers[userId] = call
 }
 
-function addVideoStream(video, stream) {
+function addVideoStream(video, stream , user={userId:"n",username:"n"}) {
   video.srcObject = stream;
   video.addEventListener('loadedmetadata', () => {
     video.play()
@@ -176,7 +182,7 @@ function addVideoStream(video, stream) {
   div.appendChild(video);
   const name = document.createElement("div");
   name.setAttribute("class","bottom-right");
-  name.innerHTML=`coolpa`
+  name.innerHTML=`${user.username}`
   div.appendChild(name)
   videoGrid.appendChild(div);
   console.log(peers)
